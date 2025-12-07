@@ -1347,7 +1347,7 @@ void dibujarRocaGrande() {
 
 void drawText(float x, float y, const char* text) {
     glDisable(GL_LIGHTING); 
-    glColor3f(0.1, 0.1f, 0.1f);   // Color blanco para el texto
+    glColor3f(0.0f, 0.0f, 0.85f);   // Color azul
 
     glRasterPos2f(x, y);
 

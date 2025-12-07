@@ -31,12 +31,14 @@ int indiceEscena = 0;
 
 // VARIABLES GLOBALES 
 int ancho = 800, alto = 600;
+int ventanaPrincipal, ventanaMenu;
 
 TipoEscena escenaActual = ESCENA_DESPERTAR;
 float tiempoGlobal = 0.0f;
 float tiempoEscena = 0.0f;
 
 int enPausa = 0;
+int animacionIniciada = 0; // Nueva variable para controlar si la animación ha comenzado
 
 float duraciones[] = {
     30.0f,  // ESCENA_DESPERTAR
@@ -47,7 +49,6 @@ float duraciones[] = {
 };
 
 // MODO DEBUG DE CAMARA 
-
 int modoDebugCamara = 0;  // 1 = activado, 0 = desactivado (para producción)
 
 // CAMARA CONTROLADA POR MOUSE (solo para debug)
@@ -66,16 +67,34 @@ float cameraLookX = 0.0f;
 float cameraLookY = 0.0f;
 float cameraLookZ = 0.0f;
 
+// Variables para el menú
+typedef enum {
+    BOTON_REPRODUCIR = 0,
+    BOTON_PAUSAR,
+    BOTON_REINICIAR,
+    BOTON_SALIR,
+    TOTAL_BOTONES
+} TipoBoton;
+
+int botonSeleccionado = -1;
+
 // PROTOTIPOS 
 void display();
+void displayMenu();
 void reshape(int w, int h);
+void reshapeMenu(int w, int h);
 void timer(int value);
 void teclado(unsigned char key, int x, int y);
+void tecladoMenu(unsigned char key, int x, int y);
+void mouseMenu(int button, int state, int x, int y);
+void mouseMotionMenu(int x, int y);
 void cambiarEscena();
 void togglePausa();
+void reiniciarAnimacion();
 void calcularPosicionCamara();
 void mostrarPosicionCamara();
-void imprimirFormatogluLookAt();
+void dibujarBoton(float x, float y, float ancho, float alto, const char* texto, int resaltado);
+void dibujarTextoCentrado(float x, float y, const char* texto);
 
 // desde robot.c
 void limpiarFrames();
@@ -110,8 +129,7 @@ void mostrarPosicionCamara() {
     printf("Angulo Y: %.2f\n", cameraAngleY);
     printf("Zoom: %.2f\n", zoom);
     printf("Escena actual: %d\n", escenaActual);
-
-  }
+}
 
 void drawDialogo() {
     glMatrixMode(GL_PROJECTION);
@@ -127,7 +145,6 @@ void drawDialogo() {
 
 
     // ESCENA 1: DESPERTAR 
-
     if (escenaActual == ESCENA_DESPERTAR) {
 
     // BLOQUE 1: Frames 1–5 
@@ -200,43 +217,43 @@ void drawDialogo() {
     // ESCENA 3: EL VIAJE 
     if (escenaActual == ESCENA_VIAJE) {
 
-    // BLOQUE 1 — Frames 1–5 
+    // BLOQUE 1 – Frames 1–5 
     if (tiempoEscena < 6.0f) {
         drawText(40, 560, "FIEE observa el rio frente a el...");
         drawText(40, 535, "Buscando la forma de cruzarlo.");
     }
 
-    // BLOQUE 2 — Frames 6–8 
+    // BLOQUE 2 – Frames 6–8 
     else if (tiempoEscena < 12.0f) {
         drawText(40, 560, "Avanza hacia la orilla con cautela.");
         drawText(40, 535, "El agua se mueve con fuerza.");
     }
 
-    // BLOQUE 3 — Saltos entre piedras 
+    // BLOQUE 3 – Saltos entre piedras 
     else if (tiempoEscena < 22.0f) {
         drawText(40, 560, "Salta de piedra en piedra con precision.");
         drawText(40, 535, "Cada salto lo acerca a su destino.");
     }
 
-    // BLOQUE 4 — Salto largo final 
+    // BLOQUE 4 – Salto largo final 
     else if (tiempoEscena < 28.0f) {
         drawText(40, 560, "Reune fuerzas para el salto final...");
         drawText(40, 535, "Y cruza el rio por completo.");
     }
 
-    // BLOQUE 5 — Recuperacion + mira la colina 
+    // BLOQUE 5 – Recuperacion + mira la colina 
     else if (tiempoEscena < 34.0f) {
         drawText(40, 560, "FIEE aterriza en la orilla y respira un momento.");
         drawText(40, 535, "A lo lejos, una colina se levanta imponente.");
     }
 
-    // BLOQUE 6 — Caminar hacia la colina 
+    // BLOQUE 6 – Caminar hacia la colina 
     else if (tiempoEscena < 38.0f) {
         drawText(40, 560, "Comienza a caminar hacia la colina.");
         drawText(40, 535, "La subida no sera sencilla.");
     }
 
-    // BLOQUE 7 — Subir la colina 
+    // BLOQUE 7 – Subir la colina 
     else if (tiempoEscena < 40.0f) {
         drawText(40, 560, "Con esfuerzo, logra subir la colina.");
         drawText(40, 535, "Ha superado otro obstaculo en su viaje.");
@@ -248,37 +265,37 @@ void drawDialogo() {
 // ESCENA 4: LA ENTREGA 
 if (escenaActual == ESCENA_ENTREGA) {
 
-    // BLOQUE 1 — Observa la casa en la colina 
+    // BLOQUE 1 – Observa la casa en la colina 
     if (tiempoEscena < 7.0f) {
         drawText(40, 560, "FIEE contempla la casa a lo lejos...");
         drawText(40, 535, "Despues de un largo viaje, por fin ha llegado.");
     }
 
-    // BLOQUE 2 — “¡Es ahí!” + empieza a bajar 
+    // BLOQUE 2 – "¡Es ahí!" + empieza a bajar 
     else if (tiempoEscena < 14.0f) {
         drawText(40, 560, "\"¡Es ahi!\"");
         drawText(40, 535, "Corre colina abajo con emocion y prisa.");
     }
 
-    // BLOQUE 3 — Recupera equilibrio + camina al frente 
+    // BLOQUE 3 – Recupera equilibrio + camina al frente 
     else if (tiempoEscena < 22.0f) {
         drawText(40, 560, "Llega al camino y recupera el equilibrio.");
         drawText(40, 535, "Se acerca a la puerta con la carta en mano.");
     }
 
-    // BLOQUE 4 — Toca la puerta 
+    // BLOQUE 4 – Toca la puerta 
     else if (tiempoEscena < 28.0f) {
         drawText(40, 560, "Toc, toc, toc...");
         drawText(40, 535, "FIEE espera con esperanza.");
     }
 
-    // BLOQUE 5 — Nadie abre + se da la vuelta triste 
+    // BLOQUE 5 – Nadie abre + se da la vuelta triste 
     else if (tiempoEscena < 33.0f) {
         drawText(40, 560, "Nadie responde...");
         drawText(40, 535, "FIEE baja la mirada y se da la vuelta triste.");
     }
 
-    // BLOQUE 6 — Voz desde adentro + FIEE se agacha esperando 
+    // BLOQUE 6 – Voz desde adentro + FIEE se agacha esperando 
     else if (tiempoEscena < 40.0f) {
         drawText(40, 560, "\"¡Un momento! ¡Ya voy!\"");
         drawText(40, 535, "FIEE se da la vuelta y se agacha emocionado, esperando a que abran.");
@@ -289,19 +306,19 @@ if (escenaActual == ESCENA_ENTREGA) {
 // ESCENA 5: EL PROPOSITO
 if (escenaActual == ESCENA_PROPOSITO) {
 
-    // BLOQUE 1 — Enderezándose tras la reverencia 
+    // BLOQUE 1 – Enderezándose tras la reverencia 
     if (tiempoEscena < 3.5f) {
         drawText(40, 560, "FIEE se incorpora lentamente...");
         drawText(40, 535, "Su mision esta cumplida.");
     }
 
-    // BLOQUE 2 — Se da la vuelta para marcharse 
+    // BLOQUE 2 – Se da la vuelta para marcharse 
     else if (tiempoEscena < 6.5f) {
         drawText(40, 560, "Da media vuelta con tranquilidad.");
         drawText(40, 535, "Una calida satisfaccion lo acompana.");
     }
 
-    // BLOQUE 3 — Se aleja hacia el horizonte 
+    // BLOQUE 3 – Se aleja hacia el horizonte 
     else if (tiempoEscena < 10.0f) {
         drawText(40, 560, "FIEE se pierde en el horizonte...");
         drawText(40, 535, "Un proposito nunca es demasiado pequeno.");
@@ -314,8 +331,96 @@ if (escenaActual == ESCENA_PROPOSITO) {
     glMatrixMode(GL_MODELVIEW);
 }
 
+// Función para dibujar texto centrado
+void dibujarTextoCentrado(float x, float y, const char* texto) {
+    int len = strlen(texto);
+    float offsetX = (len * 9) / 2.0f; // Aproximación del ancho del texto
+    glRasterPos2f(x - offsetX, y);
+    for (int i = 0; i < len; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, texto[i]);
+    }
+}
 
-//  DISPLAY 
+// Función para dibujar un botón
+void dibujarBoton(float x, float y, float ancho, float alto, const char* texto, int resaltado) {
+    // Color del botón
+    if (resaltado) {
+        glColor3f(0.3f, 0.6f, 0.9f); // Azul claro cuando está resaltado
+    } else {
+        glColor3f(0.2f, 0.4f, 0.7f); // Azul oscuro normal
+    }
+    
+    // Dibujar rectángulo del botón
+    glBegin(GL_QUADS);
+        glVertex2f(x - ancho/2, y - alto/2);
+        glVertex2f(x + ancho/2, y - alto/2);
+        glVertex2f(x + ancho/2, y + alto/2);
+        glVertex2f(x - ancho/2, y + alto/2);
+    glEnd();
+    
+    // Borde del botón
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glLineWidth(2.0f);
+    glBegin(GL_LINE_LOOP);
+        glVertex2f(x - ancho/2, y - alto/2);
+        glVertex2f(x + ancho/2, y - alto/2);
+        glVertex2f(x + ancho/2, y + alto/2);
+        glVertex2f(x - ancho/2, y + alto/2);
+    glEnd();
+    
+    // Texto del botón
+    glColor3f(1.0f, 1.0f, 1.0f);
+    dibujarTextoCentrado(x, y - 6, texto);
+}
+
+//  DISPLAY MENU
+void displayMenu() {
+    glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, 300, 0, 400);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // Título
+    glColor3f(1.0f, 1.0f, 1.0f);
+    dibujarTextoCentrado(140, 350, "PROYECTO FINAL");
+    dibujarTextoCentrado(150, 320, "FIEE");
+
+    // Estado actual
+    glColor3f(0.8f, 0.8f, 0.8f);
+    if (!animacionIniciada) {
+        dibujarTextoCentrado(150, 280, "Atajos: ESPACIO=Play/Pause");
+        dibujarTextoCentrado(150, 260, "R=Reiniciar  ESC=Salir");
+    } else if (enPausa) {
+        dibujarTextoCentrado(150, 280, "PAUSADO");
+    } else {
+        dibujarTextoCentrado(150, 280, "REPRODUCIENDO");
+    }
+
+    // Botones
+    float yInicial = 200;
+    float espaciado = 60;
+    
+    dibujarBoton(150, yInicial, 200, 40, "REPRODUCIR", 
+                 botonSeleccionado == BOTON_REPRODUCIR);
+    
+    dibujarBoton(150, yInicial - espaciado, 200, 40, "PAUSAR", 
+                 botonSeleccionado == BOTON_PAUSAR);
+    
+    dibujarBoton(150, yInicial - espaciado * 2, 200, 40, "REINICIAR", 
+                 botonSeleccionado == BOTON_REINICIAR);
+    
+    dibujarBoton(150, yInicial - espaciado * 3, 200, 40, "SALIR", 
+                 botonSeleccionado == BOTON_SALIR);
+
+    glutSwapBuffers();
+}
+
+//  DISPLAY PRINCIPAL
 void display() {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -406,7 +511,7 @@ void display() {
     glutSwapBuffers();
 }
 
-//  RESHAPE 
+//  RESHAPE PRINCIPAL
 void reshape(int w, int h) {
     ancho = w;
     alto = h;
@@ -418,12 +523,19 @@ void reshape(int w, int h) {
     gluPerspective(60, (float)w/h, 1.0, 100.0);
 }
 
+// RESHAPE MENU
+void reshapeMenu(int w, int h) {
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, w, 0, h);
+}
+
 // TIMER 
 void timer(int value) {
-
     float dt = 0.016f; // 60 FPS
 
-    if (!enPausa) {
+    if (!enPausa && animacionIniciada) {
         tiempoEscena += dt;
 
         if (tiempoEscena >= duraciones[escenaActual] - 0.001f) {
@@ -433,17 +545,32 @@ void timer(int value) {
         actualizar_robot(dt, escenaActual, tiempoEscena);
     }
 
+    glutSetWindow(ventanaPrincipal);
     glutPostRedisplay();
+    
+    glutSetWindow(ventanaMenu);
+    glutPostRedisplay();
+    
     glutTimerFunc(16, timer, 0);
 }
 
 
 // CAMBIO DE ESCENA 
 void cambiarEscena() {
-
-    indiceEscena = (indiceEscena + 1) % TOTAL_ESCENAS;
+    indiceEscena = (indiceEscena + 1);
+    
+    // Verificar si ya terminaron todas las escenas
+    if (indiceEscena >= TOTAL_ESCENAS) {
+        printf("\n");
+        printf("  TODAS LAS ESCENAS HAN FINALIZADO\n");
+        printf("Presiona REINICIAR para ver de nuevo\n\n");
+        
+        enPausa = 1;
+        animacionIniciada = 0;
+        return;
+    }
+    
     escenaActual = (TipoEscena) colaEscenas[indiceEscena];
-
     tiempoEscena = 0;
 
     // LIMPIAR frames completitos
@@ -461,7 +588,6 @@ void cambiarEscena() {
             break;
 
         case ESCENA_MISION:
-            //fiee_tiene_carta = false;
             cargarFramesEscena2();
             break;
 
@@ -483,26 +609,58 @@ void cambiarEscena() {
     }
 }
 
+// REINICIAR ANIMACIÓN
+void reiniciarAnimacion() {
+    printf("\nREINICIANDO ANIMACION \n");
+    
+    indiceEscena = 0;
+    escenaActual = ESCENA_DESPERTAR;
+    tiempoEscena = 0.0f;
+    tiempoGlobal = 0.0f;
+    enPausa = 0;
+    animacionIniciada = 1;
+    
+    // Limpiar y recargar
+    limpiarFramesCompletos();
+    frameCompletoActual = NULL;
+    frameCompletoSiguiente = NULL;
+    
+    cargarFramesEscena1();
+    
+    printf("Animacion reiniciada desde la escena 1\n");
+}
 
-
-
-// TECLADO
+// TECLADO VENTANA PRINCIPAL
 void teclado(unsigned char key, int x, int y) {
-    if (key == 27) exit(0); // ESC
+    if (key == 27) { // ESC
+        glutDestroyWindow(ventanaMenu);
+        glutDestroyWindow(ventanaPrincipal);
+        exit(0);
+    }
 
-    if (key == 'p' || key == 'P') {
-        togglePausa();
+    if (key == ' ') { // ESPACIO para play/pause
+        if (!animacionIniciada) {
+            animacionIniciada = 1;
+            enPausa = 0;
+            printf("ANIMACION INICIADA\n");
+        } else {
+            togglePausa();
+        }
+    }
+    
+    if (key == 'r' || key == 'R') { // R para reiniciar
+        reiniciarAnimacion();
     }
     
     // TECLA 'd' o 'D': Toggle modo debug
     if (key == 'd' || key == 'D') {
         modoDebugCamara = !modoDebugCamara;
         if (modoDebugCamara) {
-            printf("\n*** MODO DEBUG ACTIVADO ***\n");
+            printf("\nMODO DEBUG ACTIVADO\n");
             printf("Usa el mouse para mover la camara\n");
             printf("Presiona 'D' nuevamente para ver la version final\n\n");
         } else {
-            printf("\n*** MODO PRODUCCION ACTIVADO ***\n");
+            printf("\nMODO PRODUCCION ACTIVADO\n");
             printf("Camaras fijas por escena\n");
             printf("Presiona 'D' para volver a debug\n\n");
         }
@@ -512,14 +670,85 @@ void teclado(unsigned char key, int x, int y) {
     if ((key == 'c' || key == 'C') && modoDebugCamara) {
         mostrarPosicionCamara();
     }
+}
+
+// TECLADO VENTANA MENU
+void tecladoMenu(unsigned char key, int x, int y) {
+    if (key == 27) { // ESC
+        glutDestroyWindow(ventanaMenu);
+        glutDestroyWindow(ventanaPrincipal);
+        exit(0);
+    }
     
-    // TECLA 'r': resetear cámara (solo en modo debug)
-    if ((key == 'r' || key == 'R') && modoDebugCamara) {
-        cameraAngleX = 20.0f;
-        cameraAngleY = 0.0f;
-        zoom = -20.0f;
-        printf("Camara reseteada\n");
-        mostrarPosicionCamara();
+    if (key == ' ') { // ESPACIO
+        if (!animacionIniciada) {
+            animacionIniciada = 1;
+            enPausa = 0;
+            printf("ANIMACION INICIADA\n");
+        } else {
+            togglePausa();
+        }
+    }
+    
+    if (key == 'r' || key == 'R') {
+        reiniciarAnimacion();
+    }
+}
+
+// MOUSE MOTION VENTANA MENU
+void mouseMotionMenu(int x, int y) {
+    int ventanaAlto = glutGet(GLUT_WINDOW_HEIGHT);
+    y = ventanaAlto - y; // Invertir Y
+    
+    float yInicial = 200;
+    float espaciado = 60;
+    
+    botonSeleccionado = -1;
+    
+    // Detectar sobre qué botón está el mouse
+    if (x >= 50 && x <= 250) {
+        if (y >= yInicial - 20 && y <= yInicial + 20) {
+            botonSeleccionado = BOTON_REPRODUCIR;
+        } else if (y >= yInicial - espaciado - 20 && y <= yInicial - espaciado + 20) {
+            botonSeleccionado = BOTON_PAUSAR;
+        } else if (y >= yInicial - espaciado*2 - 20 && y <= yInicial - espaciado*2 + 20) {
+            botonSeleccionado = BOTON_REINICIAR;
+        } else if (y >= yInicial - espaciado*3 - 20 && y <= yInicial - espaciado*3 + 20) {
+            botonSeleccionado = BOTON_SALIR;
+        }
+    }
+    
+    glutPostRedisplay();
+}
+
+// MOUSE CLICK VENTANA MENU
+void mouseMenu(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        int ventanaAlto = glutGet(GLUT_WINDOW_HEIGHT);
+        y = ventanaAlto - y;
+        
+        if (botonSeleccionado == BOTON_REPRODUCIR) {
+            if (!animacionIniciada) {
+                animacionIniciada = 1;
+                enPausa = 0;
+                printf("ANIMACION INICIADA\n");
+            } else if (enPausa) {
+                enPausa = 0;
+                printf("REANUDADO\n");
+            }
+        } else if (botonSeleccionado == BOTON_PAUSAR) {
+            if (animacionIniciada && !enPausa) {
+                enPausa = 1;
+                printf("PAUSADO\n");
+            }
+        } else if (botonSeleccionado == BOTON_REINICIAR) {
+            reiniciarAnimacion();
+        } else if (botonSeleccionado == BOTON_SALIR) {
+            printf("\nSALIENDO DEL PROGRAMA\n");
+            glutDestroyWindow(ventanaMenu);
+            glutDestroyWindow(ventanaPrincipal);
+            exit(0);
+        }
     }
 }
 
@@ -533,7 +762,7 @@ void mouseMotion(int x, int y) {
 }
 
 void mouseClick(int button, int state, int x, int y) {
-    if (!modoDebugCamara) return; // No hacer nada si no está en modo debug
+    if (!modoDebugCamara) return;
     
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         isDragging = 1;
@@ -542,44 +771,39 @@ void mouseClick(int button, int state, int x, int y) {
     } 
     else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
         isDragging = 0;
-        // Mostrar posición cuando sueltas el mouse
         mostrarPosicionCamara();
     }
 
     // zoom con scroll
     if (button == 3) {
-        zoom += 1.0f;   // scroll arriba
+        zoom += 1.0f;
         mostrarPosicionCamara();
     }
     if (button == 4) {
-        zoom -= 1.0f;   // scroll abajo
+        zoom -= 1.0f;
         mostrarPosicionCamara();
     }
 }
 
 void togglePausa() {
-    enPausa = !enPausa;  // alternar estado
+    enPausa = !enPausa;
 
     if (enPausa) {
         printf("PAUSA ACTIVADA\n");
     } else {
         printf("REANUDADO\n");
-        tiempoEscena = tiempoEscena; // opcional, sólo reafirma el tiempo actual
     }
 }
 
 //  MAIN 
 int main(int argc, char** argv) {
-
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
+    // VENTANA PRINCIPAL (Animación)
     glutInitWindowSize(ancho, alto);
-    glutCreateWindow("Proyecto Final - FIEE");
-
-    
-    int colaEscenas[TOTAL_ESCENAS] = {0,1,2,3,4};
-
+    glutInitWindowPosition(100, 100);
+    ventanaPrincipal = glutCreateWindow("Proyecto Final - FIEE ");
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
@@ -597,8 +821,7 @@ int main(int argc, char** argv) {
     glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
     glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
 
-    glEnable(GL_NORMALIZE);  // cartoon suave
-
+    glEnable(GL_NORMALIZE);
 
     inicializar_robot();
     inicializar_texturas_objetos();
@@ -607,30 +830,44 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(teclado);
-    glutTimerFunc(36, timer, 0);
-    
     glutMouseFunc(mouseClick);
     glutMotionFunc(mouseMotion);
 
-    printf("\n=======================================\n");
+    // VENTANA MENU (Sub-ventana de control)
+    glutInitWindowSize(300, 400);
+    glutInitWindowPosition(920, 100);
+    ventanaMenu = glutCreateWindow("Menu de Control - FIEE");
+
+    glutDisplayFunc(displayMenu);
+    glutReshapeFunc(reshapeMenu);
+    glutKeyboardFunc(tecladoMenu);
+    glutMouseFunc(mouseMenu);
+    glutPassiveMotionFunc(mouseMotionMenu);
+
+    // Timer global
+    glutTimerFunc(16, timer, 0);
+
     printf("    PROYECTO FINAL - FIEE\n");
-    printf("=======================================\n");
+    printf("\nSISTEMA CON MENU PRINCIPAL\n");
+    printf("\nCONTROLES GENERALES:\n");
+    printf("  ESPACIO: Reproducir/Pausar\n");
+    printf("  R: Reiniciar animacion\n");
+    printf("  ESC: Salir\n");
+    printf("\nMENU DE CONTROL:\n");
+    printf("  - Reproducir/Reanudar animacion\n");
+    printf("  - Pausar animacion\n");
+    printf("  - Reiniciar animacion\n");
+    printf("  - Salir del programa\n");
     if (modoDebugCamara) {
-        printf("MODO DEBUG ACTIVADO\n");
-        printf("\nCONTROLES DE CAMARA:\n");
+        printf("\nMODO DEBUG ACTIVADO:\n");
         printf("  Mouse: Arrastra para rotar\n");
         printf("  Scroll: Zoom in/out\n");
-        printf("  C: Mostrar posicion\n");
-        printf("  R: Resetear camara\n");
         printf("  D: Alternar modo debug/produccion\n");
     } else {
-        printf("MODO PRODUCCION\n");
+        printf("\nMODO PRODUCCION:\n");
         printf("  D: Activar modo debug\n");
     }
-    printf("\nCONTROLES GENERALES:\n");
-    printf("  P: Pausar/Reanudar\n");
-    printf("  ESC: Salir\n");
-    printf("=======================================\n\n");
+    printf("\nPresiona REPRODUCIR o ESPACIO para comenzar\n\n");
 
     glutMainLoop();
     return 0;
