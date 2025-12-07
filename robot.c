@@ -2738,7 +2738,7 @@ agregarFrameCompleto((FrameCompleto){
         .tiene_carta = 1
     });
     
-    // Frame 26: Extendiendo brazos como entregando paquete
+    // Frame 26: 
     agregarFrameCompleto((FrameCompleto){
         .cabeza_x = 10, .cabeza_y = 0,
         .torso_x = 5,
@@ -2751,7 +2751,7 @@ agregarFrameCompleto((FrameCompleto){
         .tiene_carta = 1
     });
     
-    // Frame 27: Bajando brazos después de entregar
+    // Frame 27:
     agregarFrameCompleto((FrameCompleto){
         .cabeza_x = 5, .cabeza_y = 0,
         .torso_x = 0,

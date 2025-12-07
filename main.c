@@ -46,9 +46,8 @@ float duraciones[] = {
     10.0f   // ESCENA_PROPOSITO
 };
 
-// ==========================================
-// MODO DEBUG DE CAMARA (ACTIVAR/DESACTIVAR)
-// ==========================================
+// MODO DEBUG DE CAMARA 
+
 int modoDebugCamara = 0;  // 1 = activado, 0 = desactivado (para producción)
 
 // CAMARA CONTROLADA POR MOUSE (solo para debug)
@@ -112,6 +111,207 @@ void mostrarPosicionCamara() {
     printf("Zoom: %.2f\n", zoom);
     printf("Escena actual: %d\n", escenaActual);
 
+  }
+
+void drawDialogo() {
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Sistema de coordenadas 2D
+    gluOrtho2D(0, ancho, 0, alto);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+
+    // ESCENA 1: DESPERTAR 
+
+    if (escenaActual == ESCENA_DESPERTAR) {
+
+    // BLOQUE 1: Frames 1–5 
+    if (tiempoEscena < 6.0f) {
+        drawText(40, 560, "Una oficina postal olvidada...");
+        drawText(40, 535, "Un rayo de sol despierta lentamente a FIEE.");
+    }
+
+    // BLOQUE 2: Frames 6–12 
+    else if (tiempoEscena < 12.0f) {
+        drawText(40, 560, "FIEE se pone de pie y mira alrededor.");
+        drawText(40, 535, "Da sus primeros pasos, aun oxidado.");
+    }
+
+    // BLOQUE 3: Frames 13–15
+    else if (tiempoEscena < 18.0f) {
+        drawText(40, 560, "Observa a su alrededor...");
+        drawText(40, 535, "Intentando recordar este lugar.");
+    }
+
+    // BLOQUE 4: Frames 16–20 
+    else if (tiempoEscena < 24.0f) {
+        drawText(40, 560, "Se acerca al escritorio antiguo.");
+        drawText(40, 535, "Quizas haya algo importante alli.");
+    }
+
+    // BLOQUE 5: Frames 21–25 
+    else if (tiempoEscena < 30.0f) {
+        drawText(40, 560, "Una estanteria al fondo llama su atencion.");
+        drawText(40, 535, "FIEE la examina con curiosidad.");
+    }
+  }
+
+    // ESCENA 2: LA MISION 
+    if (escenaActual == ESCENA_MISION) {
+
+    // BLOQUE 1 (Frames 1–4) 
+    if (tiempoEscena < 6.0f) {
+        drawText(40, 560, "FIEE se endereza frente al viejo armario.");
+        drawText(40, 535, "Algo en su interior parece importante...");
+    }
+
+    // BLOQUE 2 (Frames 5–11) 
+    else if (tiempoEscena < 12.0f) {
+        drawText(40, 560, "Camina hacia el armario con pasos firmes.");
+        drawText(40, 535, "Su curiosidad crece con cada movimiento.");
+    }
+
+    // BLOQUE 3 (Frames 12–16) 
+    else if (tiempoEscena < 18.0f) {
+        drawText(40, 560, "FIEE abre el armario y encuentra una carta.");
+        drawText(40, 535, "La toma con cuidado... como si la reconociera.");
+    }
+
+    // BLOQUE 4 (Frames 17–19) 
+    else if (tiempoEscena < 24.0f) {
+        drawText(40, 560, "\"Una direccion...\" murmura en silencio.");
+        drawText(40, 535, "Sus sensores se activan con determinacion.");
+    }
+
+    // BLOQUE 5 (Frames 20–25) 
+    else if (tiempoEscena < 30.0f) {
+        drawText(40, 560, "Se gira hacia la puerta, carta en mano.");
+        drawText(40, 535, "Es momento de salir a cumplir su mision.");
+    }
+  }
+
+
+
+    // ESCENA 3: EL VIAJE 
+    if (escenaActual == ESCENA_VIAJE) {
+
+    // BLOQUE 1 — Frames 1–5 
+    if (tiempoEscena < 6.0f) {
+        drawText(40, 560, "FIEE observa el rio frente a el...");
+        drawText(40, 535, "Buscando la forma de cruzarlo.");
+    }
+
+    // BLOQUE 2 — Frames 6–8 
+    else if (tiempoEscena < 12.0f) {
+        drawText(40, 560, "Avanza hacia la orilla con cautela.");
+        drawText(40, 535, "El agua se mueve con fuerza.");
+    }
+
+    // BLOQUE 3 — Saltos entre piedras 
+    else if (tiempoEscena < 22.0f) {
+        drawText(40, 560, "Salta de piedra en piedra con precision.");
+        drawText(40, 535, "Cada salto lo acerca a su destino.");
+    }
+
+    // BLOQUE 4 — Salto largo final 
+    else if (tiempoEscena < 28.0f) {
+        drawText(40, 560, "Reune fuerzas para el salto final...");
+        drawText(40, 535, "Y cruza el rio por completo.");
+    }
+
+    // BLOQUE 5 — Recuperacion + mira la colina 
+    else if (tiempoEscena < 34.0f) {
+        drawText(40, 560, "FIEE aterriza en la orilla y respira un momento.");
+        drawText(40, 535, "A lo lejos, una colina se levanta imponente.");
+    }
+
+    // BLOQUE 6 — Caminar hacia la colina 
+    else if (tiempoEscena < 38.0f) {
+        drawText(40, 560, "Comienza a caminar hacia la colina.");
+        drawText(40, 535, "La subida no sera sencilla.");
+    }
+
+    // BLOQUE 7 — Subir la colina 
+    else if (tiempoEscena < 40.0f) {
+        drawText(40, 560, "Con esfuerzo, logra subir la colina.");
+        drawText(40, 535, "Ha superado otro obstaculo en su viaje.");
+    }
+}
+
+
+
+// ESCENA 4: LA ENTREGA 
+if (escenaActual == ESCENA_ENTREGA) {
+
+    // BLOQUE 1 — Observa la casa en la colina 
+    if (tiempoEscena < 7.0f) {
+        drawText(40, 560, "FIEE contempla la casa a lo lejos...");
+        drawText(40, 535, "Despues de un largo viaje, por fin ha llegado.");
+    }
+
+    // BLOQUE 2 — “¡Es ahí!” + empieza a bajar 
+    else if (tiempoEscena < 14.0f) {
+        drawText(40, 560, "\"¡Es ahi!\"");
+        drawText(40, 535, "Corre colina abajo con emocion y prisa.");
+    }
+
+    // BLOQUE 3 — Recupera equilibrio + camina al frente 
+    else if (tiempoEscena < 22.0f) {
+        drawText(40, 560, "Llega al camino y recupera el equilibrio.");
+        drawText(40, 535, "Se acerca a la puerta con la carta en mano.");
+    }
+
+    // BLOQUE 4 — Toca la puerta 
+    else if (tiempoEscena < 28.0f) {
+        drawText(40, 560, "Toc, toc, toc...");
+        drawText(40, 535, "FIEE espera con esperanza.");
+    }
+
+    // BLOQUE 5 — Nadie abre + se da la vuelta triste 
+    else if (tiempoEscena < 33.0f) {
+        drawText(40, 560, "Nadie responde...");
+        drawText(40, 535, "FIEE baja la mirada y se da la vuelta triste.");
+    }
+
+    // BLOQUE 6 — Voz desde adentro + FIEE se agacha esperando 
+    else if (tiempoEscena < 40.0f) {
+        drawText(40, 560, "\"¡Un momento! ¡Ya voy!\"");
+        drawText(40, 535, "FIEE se da la vuelta y se agacha emocionado, esperando a que abran.");
+    }
+}
+
+
+// ESCENA 5: EL PROPOSITO
+if (escenaActual == ESCENA_PROPOSITO) {
+
+    // BLOQUE 1 — Enderezándose tras la reverencia 
+    if (tiempoEscena < 3.5f) {
+        drawText(40, 560, "FIEE se incorpora lentamente...");
+        drawText(40, 535, "Su mision esta cumplida.");
+    }
+
+    // BLOQUE 2 — Se da la vuelta para marcharse 
+    else if (tiempoEscena < 6.5f) {
+        drawText(40, 560, "Da media vuelta con tranquilidad.");
+        drawText(40, 535, "Una calida satisfaccion lo acompana.");
+    }
+
+    // BLOQUE 3 — Se aleja hacia el horizonte 
+    else if (tiempoEscena < 10.0f) {
+        drawText(40, 560, "FIEE se pierde en el horizonte...");
+        drawText(40, 535, "Un proposito nunca es demasiado pequeno.");
+    }
+}
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
 }
 
 
@@ -202,7 +402,7 @@ void display() {
             dibujarEscenaProposito();
             break;
     }
-
+    drawDialogo();
     glutSwapBuffers();
 }
 

@@ -109,6 +109,6 @@ void dibujarRocaGrande();
 void inicializar_texturas_objetos();
 unsigned int cargar_textura(const char* archivo);
 void dibujar_casa_simple_puerta_abierta();
-
+void drawText(float x, float y, const char* text);
 
 #endif // OBJETOS_H

@@ -1345,3 +1345,19 @@ void dibujarRocaGrande() {
 
 
 
+void drawText(float x, float y, const char* text) {
+    glDisable(GL_LIGHTING); 
+    glColor3f(0.1, 0.1f, 0.1f);   // Color blanco para el texto
+
+    glRasterPos2f(x, y);
+
+    for (const char* c = text; *c != '\0'; c++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+    }
+
+    glEnable(GL_LIGHTING);
+}
+
+
+
+
