@@ -385,6 +385,9 @@ void dibujarEscenaMision(){
         glTranslatef(-4.5f, -0.60f, -4.0f);
         dibujar_cajon_escritorio();
     glPopMatrix();
+
+    // DIBUJAR A FIEE 
+     dibujar_robot();
     
     // ARMARIO
     glPushMatrix();
@@ -478,9 +481,6 @@ void dibujarEscenaMision(){
     
     glDisable(GL_BLEND);
     glEnable(GL_LIGHTING);
-    
-    // DIBUJAR A FIEE 
-     dibujar_robot();
     
 }
 
