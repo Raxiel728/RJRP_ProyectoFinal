@@ -1,5 +1,6 @@
 #include <GL/glut.h>
 #include <stdio.h>
+#include <math.h>
 #include "robot.h"
 #include "escenas.h"
 #include "objetos.h"
@@ -45,13 +46,26 @@ float duraciones[] = {
     10.0f   // ESCENA_PROPOSITO
 };
 
-// CAMARA CONTROLADA POR MOUSE 
+// ==========================================
+// MODO DEBUG DE CAMARA (ACTIVAR/DESACTIVAR)
+// ==========================================
+int modoDebugCamara = 0;  // 1 = activado, 0 = desactivado (para producción)
+
+// CAMARA CONTROLADA POR MOUSE (solo para debug)
 float cameraAngleX = 20.0f;
 float cameraAngleY = 0.0f;
 float zoom = -20.0f;
 
 int mouseX, mouseY;
 int isDragging = 0;
+
+// Variables para tracking de cámara
+float cameraPosX = 0.0f;
+float cameraPosY = 0.0f;
+float cameraPosZ = 0.0f;
+float cameraLookX = 0.0f;
+float cameraLookY = 0.0f;
+float cameraLookZ = 0.0f;
 
 // PROTOTIPOS 
 void display();
@@ -60,10 +74,45 @@ void timer(int value);
 void teclado(unsigned char key, int x, int y);
 void cambiarEscena();
 void togglePausa();
+void calcularPosicionCamara();
+void mostrarPosicionCamara();
+void imprimirFormatogluLookAt();
 
 // desde robot.c
 void limpiarFrames();
 void limpiarFramesCompletos();
+
+
+// FUNCIÓN PARA CALCULAR LA POSICIÓN DE LA CÁMARA
+void calcularPosicionCamara() {
+    // Convertir ángulos a radianes
+    float angleXRad = cameraAngleX * M_PI / 180.0f;
+    float angleYRad = cameraAngleY * M_PI / 180.0f;
+    
+    // Calcular posición de la cámara basada en los ángulos y el zoom
+    cameraPosX = -zoom * sin(angleYRad) * cos(angleXRad);
+    cameraPosY = -zoom * sin(angleXRad);
+    cameraPosZ = -zoom * cos(angleYRad) * cos(angleXRad);
+    
+    // El punto de vista está en el origen después de las rotaciones
+    cameraLookX = 0.0f;
+    cameraLookY = 0.0f;
+    cameraLookZ = 0.0f;
+}
+
+// FUNCIÓN PARA MOSTRAR LA POSICIÓN DE LA CÁMARA
+void mostrarPosicionCamara() {
+    calcularPosicionCamara();
+    
+    printf("\nPOSICION DE CAMARA \n");
+    printf("Posicion: (%.2f, %.2f, %.2f)\n", cameraPosX, cameraPosY, cameraPosZ);
+    printf("Mirando hacia: (%.2f, %.2f, %.2f)\n", cameraLookX, cameraLookY, cameraLookZ);
+    printf("Angulo X: %.2f\n", cameraAngleX);
+    printf("Angulo Y: %.2f\n", cameraAngleY);
+    printf("Zoom: %.2f\n", zoom);
+    printf("Escena actual: %d\n", escenaActual);
+
+}
 
 
 //  DISPLAY 
@@ -74,56 +123,82 @@ void display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // APLICAR ROTACIONES DEL MOUSE A TODAS LAS ESCENAS 
-    glTranslatef(0.0f, 0.0f, zoom);
-    glRotatef(cameraAngleX, 1.0, 0.0, 0.0);
-    glRotatef(cameraAngleY, 0.0, 1.0, 0.0);
+    // SI MODO DEBUG ESTÁ ACTIVADO: usar controles de mouse
+    // SI ESTÁ DESACTIVADO: usar cámaras fijas de producción
+    
+    if (modoDebugCamara) {
+        // MODO DEBUG: Aplicar rotaciones del mouse
+        glTranslatef(0.0f, 0.0f, zoom);
+        glRotatef(cameraAngleX, 1.0, 0.0, 0.0);
+        glRotatef(cameraAngleY, 0.0, 1.0, 0.0);
+        
+        // Cámara simple para ver todo
+        gluLookAt(
+            0.0, 0.0, 0.0,
+            0.0, 0.0, -1.0,
+            0.0, 1.0, 0.0
+        );
+        
+    } else {
+        // MODO PRODUCCIÓN: Usar cámaras fijas por escena
+        switch (escenaActual) {
+            case ESCENA_DESPERTAR:
+            gluLookAt(
+               0.46, 2.27, 9.73,   // Cámara
+               0.00, 0.00, 0.00,   // Mirando al centro
+               0.0, 1.0, 0.0       // Arriba
+            );
+                break;
+                
+            case ESCENA_MISION:
+            gluLookAt(
+               -6.45, 3.62, -6.73,  // Posición de la cámara
+               0.00, 0.00, 0.00,    // Punto hacia donde mira
+               0.0, 1.0, 0.0        // Vector UP
+            );
+                break;
+                
+            case ESCENA_VIAJE:
+            gluLookAt(
+               -6.75, 3.71, 18.46,  // Posición de la cámara
+               0.00, 0.00, 0.00,    // Punto hacia donde mira
+               0.0, 1.0, 0.0        // Vector UP
+            );
+                break;
+                
+            case ESCENA_ENTREGA:
+            gluLookAt(
+               -4.33, 13.48, 37.41,  // Posición de la cámara
+               0.00, 0.00, 0.00,     // Punto hacia donde mira
+               0.0, 1.0, 0.0         // Vector UP
+            );
+                break;
+                
+            case ESCENA_PROPOSITO:
+            gluLookAt(
+               17.66, 12.25, -31.34,  // Posición de la cámara
+               0.00, 0.00, 0.00,      // Punto hacia donde mira
+               0.0, 1.0, 0.0          // Vector UP
+            );
+                break;
+        }
+    }
 
-
-    // Configurar cámara según la escena actual
+    // Dibujar la escena correspondiente (siempre igual)
     switch (escenaActual) {
         case ESCENA_DESPERTAR:
-            gluLookAt(
-                -1.2, 2.0, 10.0,   // Cámara alejada viendo toda la oficina
-                -1.2, 0.0, 2.0,    // Mirando hacia FIEE
-                0.0, 1.0, 0.0      // Arriba
-            );
             dibujarEscenaDespertar();
             break;
-            
         case ESCENA_MISION:
-               gluLookAt(
-                4.5, 3.8, -5.5,    // Cámara en la VENTANA (donde sale el rayo de luz)
-                -1.2, 0.0, 2.0,    // Mirando hacia FIEE (viendo su espalda)
-                0.0, 1.0, 0.0      // Arriba
-            );
             dibujarEscenaMision();
             break;
-            
         case ESCENA_VIAJE:
-            gluLookAt(
-                0.0, 2.5, 9.0,     // Cámara siguiendo al robot
-                0.0, 1.0, 0.0,     // Mirando al robot
-                0.0, 1.0, 0.0      // Arriba
-            );
             dibujarEscenaViaje();
             break;
-            
         case ESCENA_ENTREGA:
-            gluLookAt(
-                0.0, 2.5, 9.0,     // Vista general
-                0.0, 1.0, 0.0,     // Mirando la escena
-                0.0, 1.0, 0.0      // Arriba
-            );
             dibujarEscenaEntrega();
             break;
-            
         case ESCENA_PROPOSITO:
-            gluLookAt(
-                0.0, 2.5, 9.0,     // Vista del atardecer
-                0.0, 1.0, 0.0,     // Mirando al robot
-                0.0, 1.0, 0.0      // Arriba
-            );
             dibujarEscenaProposito();
             break;
     }
@@ -169,8 +244,6 @@ void cambiarEscena() {
     indiceEscena = (indiceEscena + 1) % TOTAL_ESCENAS;
     escenaActual = (TipoEscena) colaEscenas[indiceEscena];
 
-    printf("CAMBIO A ESCENA %d\n", escenaActual);
-
     tiempoEscena = 0;
 
     // LIMPIAR frames completitos
@@ -204,22 +277,54 @@ void cambiarEscena() {
             cargarFramesEscena5();
             break;
     }
+    
+    if (modoDebugCamara) {
+        printf("\n>> CAMBIO A ESCENA %d <<\n", escenaActual);
+    }
 }
 
 
 
 
-// TECLADO =
+// TECLADO
 void teclado(unsigned char key, int x, int y) {
     if (key == 27) exit(0); // ESC
 
     if (key == 'p' || key == 'P') {
         togglePausa();
     }
+    
+    // TECLA 'd' o 'D': Toggle modo debug
+    if (key == 'd' || key == 'D') {
+        modoDebugCamara = !modoDebugCamara;
+        if (modoDebugCamara) {
+            printf("\n*** MODO DEBUG ACTIVADO ***\n");
+            printf("Usa el mouse para mover la camara\n");
+            printf("Presiona 'D' nuevamente para ver la version final\n\n");
+        } else {
+            printf("\n*** MODO PRODUCCION ACTIVADO ***\n");
+            printf("Camaras fijas por escena\n");
+            printf("Presiona 'D' para volver a debug\n\n");
+        }
+    }
+    
+    // TECLA 'c': mostrar posición de cámara (solo en modo debug)
+    if ((key == 'c' || key == 'C') && modoDebugCamara) {
+        mostrarPosicionCamara();
+    }
+    
+    // TECLA 'r': resetear cámara (solo en modo debug)
+    if ((key == 'r' || key == 'R') && modoDebugCamara) {
+        cameraAngleX = 20.0f;
+        cameraAngleY = 0.0f;
+        zoom = -20.0f;
+        printf("Camara reseteada\n");
+        mostrarPosicionCamara();
+    }
 }
 
 void mouseMotion(int x, int y) {
-    if (isDragging) {
+    if (isDragging && modoDebugCamara) {
         cameraAngleY += (x - mouseX) * 0.3f;
         cameraAngleX += (y - mouseY) * 0.3f;
         mouseX = x;
@@ -228,6 +333,8 @@ void mouseMotion(int x, int y) {
 }
 
 void mouseClick(int button, int state, int x, int y) {
+    if (!modoDebugCamara) return; // No hacer nada si no está en modo debug
+    
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         isDragging = 1;
         mouseX = x;
@@ -235,11 +342,19 @@ void mouseClick(int button, int state, int x, int y) {
     } 
     else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
         isDragging = 0;
+        // Mostrar posición cuando sueltas el mouse
+        mostrarPosicionCamara();
     }
 
     // zoom con scroll
-    if (button == 3) zoom += 1.0f;   // scroll arriba
-    if (button == 4) zoom -= 1.0f;   // scroll abajo
+    if (button == 3) {
+        zoom += 1.0f;   // scroll arriba
+        mostrarPosicionCamara();
+    }
+    if (button == 4) {
+        zoom -= 1.0f;   // scroll abajo
+        mostrarPosicionCamara();
+    }
 }
 
 void togglePausa() {
@@ -296,6 +411,26 @@ int main(int argc, char** argv) {
     
     glutMouseFunc(mouseClick);
     glutMotionFunc(mouseMotion);
+
+    printf("\n=======================================\n");
+    printf("    PROYECTO FINAL - FIEE\n");
+    printf("=======================================\n");
+    if (modoDebugCamara) {
+        printf("MODO DEBUG ACTIVADO\n");
+        printf("\nCONTROLES DE CAMARA:\n");
+        printf("  Mouse: Arrastra para rotar\n");
+        printf("  Scroll: Zoom in/out\n");
+        printf("  C: Mostrar posicion\n");
+        printf("  R: Resetear camara\n");
+        printf("  D: Alternar modo debug/produccion\n");
+    } else {
+        printf("MODO PRODUCCION\n");
+        printf("  D: Activar modo debug\n");
+    }
+    printf("\nCONTROLES GENERALES:\n");
+    printf("  P: Pausar/Reanudar\n");
+    printf("  ESC: Salir\n");
+    printf("=======================================\n\n");
 
     glutMainLoop();
     return 0;

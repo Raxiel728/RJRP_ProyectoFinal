@@ -684,10 +684,6 @@ void actualizar_robot(float dt, int escena, float t){
         return;
 
     escena_actual = escena;
-    
-    // PRINT CONTINUO PARA VER QUÉ PASA
-    printf("actualizar_robot: escena=%d, frame=%d, carta=%d\n", 
-           escena, frame_contador, fiee_tiene_carta);
 
     // Inicialización
     if (!frameCompletoActual) {
@@ -709,7 +705,7 @@ void actualizar_robot(float dt, int escena, float t){
             tiempoFrame = 0.0f;
             alpha = 0.0f;
             frame_contador++;
-            printf(">>> CAMBIO DE FRAME: %d\n", frame_contador);
+            //printf(">>> CAMBIO DE FRAME: %d\n", frame_contador);
         }
     }
 
