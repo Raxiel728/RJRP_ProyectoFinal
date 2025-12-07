@@ -436,84 +436,8 @@ void dibujar_mancha_humedad(float posX, float posY, float posZ, float scaleX, fl
     glPopMatrix();
 }
 
-//  CARTA MÁGICA 
-
-void dibujar_carta_magica() {
-    glPushMatrix();
-        // Sobre de la carta 
-        glColor3f(1.0f, 0.92f, 0.6f);
-        glScalef(0.35f, 0.02f, 0.5f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    // Sello 
-    glPushMatrix();
-        glColor3f(0.95f, 0.2f, 0.2f);
-        glTranslatef(0.08f, 0.015f, -0.12f);
-        glScalef(0.08f, 0.01f, 0.08f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    // Líneas de dirección
-    glColor3f(0.2f, 0.2f, 0.4f);
-    
-    glPushMatrix();
-        glTranslatef(-0.05f, 0.015f, 0.05f);
-        glScalef(0.18f, 0.005f, 0.02f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    glPushMatrix();
-        glTranslatef(-0.05f, 0.015f, 0.0f);
-        glScalef(0.18f, 0.005f, 0.02f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    glPushMatrix();
-        glTranslatef(-0.05f, 0.015f, -0.05f);
-        glScalef(0.18f, 0.005f, 0.02f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-}
-
-void dibujar_resplandor_carta() {
-    // Resplandor exterior (más grande)
-    glColor4f(1.0f, 0.95f, 0.6f, 0.2f);
-    glutSolidSphere(0.6f, 20, 20);
-    
-    // Resplandor medio
-    glPushMatrix();
-        glColor4f(1.0f, 0.95f, 0.7f, 0.4f);
-        glScalef(2.0f/3.0f, 2.0f/3.0f, 2.0f/3.0f);
-        glutSolidSphere(0.6f, 20, 20);
-    glPopMatrix();
-}
-
-
-// LÍNEA VISUAL 
-
-void dibujar_linea_visual() {
-    glLineWidth(3.0f);
-    glBegin(GL_LINES);
-        glVertex3f(0, 0.2f, 0);
-        glVertex3f(0, 0, 0);
-    glEnd();
-}
 
 // PUERTA 
-
-void dibujar_marco_puerta() {
-    glColor3f(0.35f, 0.28f, 0.22f);
-    glScalef(2.5f, 4.5f, 0.3f);
-    glutSolidCube(1.0f);
-}
-
-void dibujar_puerta() {
-    glColor3f(0.30f, 0.22f, 0.18f);
-    glScalef(2.2f, 4.2f, 0.15f);
-    glutSolidCube(1.0f);
-}
-
 void dibujar_manija_puerta() {
     glColor3f(0.60f, 0.55f, 0.45f);
     glTranslatef(0.5f, 0, 0.05f);
@@ -642,15 +566,6 @@ void dibujar_puerta_simple() {
 }
 
 
-void dibujar_puerta_entreabierta() {
-    // Puerta girada ligeramente (-10 grados)
-    glPushMatrix();
-        glColor3f(0.30f, 0.22f, 0.18f);
-        glRotatef(-10, 0, 1, 0);  // Rotación para mostrar que está atascada
-        glScalef(2.2f, 4.2f, 0.15f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-}
 
 void dibujar_haz_luz_rendija() {
     // Haz de luz saliendo por la rendija de la puerta
@@ -870,14 +785,6 @@ void dibujar_orilla_rio() {
     glPopMatrix();
 }
 
-void dibujar_piedra_decorativa(float escala) {
-    // Piedra decorativa simple
-    glPushMatrix();
-        glColor3f(0.50f, 0.50f, 0.55f);  // Gris piedra
-        glScalef(escala, escala * 0.6f, escala);
-        glutSolidSphere(0.5f, 12, 12);
-    glPopMatrix();
-}
 
 // ESCENA 4: LA ENTREGA 
 
@@ -1164,66 +1071,6 @@ void dibujar_estrella() {
     glEnable(GL_LIGHTING);
 }
 
-void dibujar_mano_humana() {
-    // Brazo más proporcionado
-    glPushMatrix();
-        glColor3f(0.95f, 0.80f, 0.70f);  // Tono piel
-        glRotatef(-20, 0, 0, 1);  // Inclinado suavemente
-        glScalef(0.2f, 0.8f, 0.2f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    // Palma de la mano
-    glPushMatrix();
-        glColor3f(0.95f, 0.80f, 0.70f);
-        glTranslatef(0.2f, 0.3f, 0);
-        glRotatef(10, 0, 0, 1);
-        glScalef(0.35f, 0.5f, 0.25f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    // Dedos más pequeños y mejor posicionados
-    // Dedo 1
-    glPushMatrix();
-        glColor3f(0.92f, 0.77f, 0.67f);
-        glTranslatef(0.3f, 0.55f, -0.1f);
-        glScalef(0.08f, 0.25f, 0.08f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    // Dedo 2
-    glPushMatrix();
-        glColor3f(0.92f, 0.77f, 0.67f);
-        glTranslatef(0.35f, 0.6f, -0.03f);
-        glScalef(0.08f, 0.28f, 0.08f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    // Dedo 3 (medio)
-    glPushMatrix();
-        glColor3f(0.92f, 0.77f, 0.67f);
-        glTranslatef(0.35f, 0.62f, 0.05f);
-        glScalef(0.08f, 0.3f, 0.08f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    // Dedo 4
-    glPushMatrix();
-        glColor3f(0.92f, 0.77f, 0.67f);
-        glTranslatef(0.32f, 0.58f, 0.12f);
-        glScalef(0.08f, 0.26f, 0.08f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-    
-    // Pulgar
-    glPushMatrix();
-        glColor3f(0.92f, 0.77f, 0.67f);
-        glTranslatef(0.15f, 0.15f, 0.15f);
-        glRotatef(-40, 0, 0, 1);
-        glScalef(0.1f, 0.25f, 0.1f);
-        glutSolidCube(1.0f);
-    glPopMatrix();
-}
 
 void dibujar_media_luna(float radioExterior, float radioInterior, float offset) {
 

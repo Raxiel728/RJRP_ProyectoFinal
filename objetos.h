@@ -62,31 +62,17 @@ void dibujar_telarana_esquina(float posX, float posZ);
 void dibujar_mancha_humedad(float posX, float posY, float posZ, float scaleX, float scaleY);
 
 
-void dibujar_particulas_magicas();
-
 // ESCENA 2: La Misión
 void dibujar_armario();
-void dibujar_puerta_entreabierta();
 void dibujar_haz_luz_rendija();
 void dibujar_puerta_simple();
 
-// Línea visual
-void dibujar_linea_visual();
-
 // Puerta
-void dibujar_puerta();
-void dibujar_marco_puerta();
 void dibujar_manija_puerta();
-void dibujar_luz_puerta();
-
-// Efectos especiales
-void dibujar_ojos_brillantes();
 
 // Escenas simplificadas
 void dibujar_camino();
 void dibujar_cesped();
-void dibujar_casa_cartoon();
-void dibujar_persona_cartoon();
 void dibujar_colina();
 
 // Nuevos objetos para Escena 3: El Viaje
@@ -97,10 +83,8 @@ void dibujar_arbol();
 void dibujar_nube(float escala);
 void dibujar_sol();
 void dibujar_orilla_rio();
-void dibujar_piedra_decorativa(float escala);
 void dibujar_casa_simple();
 void dibujar_estrella();
-void dibujar_mano_humana();
 void dibujar_media_luna(float radioExterior, float radioInterior, float offset);
 void dibujarArbusto();
 void dibujarTroncoCaido();
