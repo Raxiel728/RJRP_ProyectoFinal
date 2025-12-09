@@ -9,15 +9,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "libs/stb_image.h"
 
-typedef enum {
-    ESCENA_DESPERTAR = 0,
-    ESCENA_MISION,
-    ESCENA_VIAJE,
-    ESCENA_ENTREGA,
-    ESCENA_PROPOSITO,
-    TOTAL_ESCENAS
-} TipoEscena;
-
 
 static void dibujar_gorra();
 static void dibujar_cabeza();
@@ -99,10 +90,6 @@ void dibujarNodo(Nodo* n)
 }
 
 
-// LISTA
-
-
-// AGREGAR estas líneas después de las variables de ángulos existentes
 float robot_pos_x = 0.0f;
 float robot_pos_y = 0.0f;
 float robot_pos_z = 0.0f;
@@ -122,12 +109,6 @@ Nodo* nodoPiernaDer   = NULL;
 bool fiee_tiene_carta = false;
 int escena_actual = 1;
 int frame_contador = 0;
-
-
-typedef struct Posicion {
-    float x, y, z;
-    float rot_y;
-} Posicion;
 
 
 typedef struct FrameCompleto {
@@ -211,7 +192,6 @@ unsigned int textura_ojos;
 
 // Prototipo de función interna de interpolación
 static void aplicarFrameCompletoInterpolado(FrameCompleto* a, FrameCompleto* b, float alpha);
-unsigned int cargar_textura(const char* archivo);
 
 // FUNCION PARA CARGAR TEXTURA (stb_image)
 
@@ -260,28 +240,7 @@ static void esfera(float r) {
     glutSolidSphere(r, 32, 32);
 }
 
-static void cilindro(float r, float h) {
-    GLUquadric* q = gluNewQuadric();
-    gluQuadricNormals(q, GLU_SMOOTH);
-    gluCylinder(q, r, r, h, 32, 32);
-    gluDeleteQuadric(q);
-}
 
-// Segmento conectado con articulaciones suaves
-static void segmento_conectado(float r1, float r2, float h) {
-    GLUquadric* q = gluNewQuadric();
-    gluQuadricNormals(q, GLU_SMOOTH);
-    
-    glutSolidSphere(r1, 32, 32);  // Articulación inicial
-    gluCylinder(q, r1, r2, h, 32, 32);  // Cilindro cónico
-    
-    glPushMatrix();
-        glTranslatef(0, 0, h);
-        glutSolidSphere(r2, 32, 32);  // Articulación final
-    glPopMatrix();
-    
-    gluDeleteQuadric(q);
-}
 
 // FUNCIONES CON TEXTURA
 
