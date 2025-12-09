@@ -18,6 +18,17 @@ static void dibujar_pierna(float lado);
 static void dibujar_mochila();
 static void dibujar_zapato();
 
+// ENUMS 
+typedef enum {
+    ESCENA_DESPERTAR = 0,
+    ESCENA_MISION,
+    ESCENA_VIAJE,
+    ESCENA_ENTREGA,
+    ESCENA_PROPOSITO,
+
+    TOTAL_ESCENAS
+} TipoEscena;
+
 
 //  ARBOL JERÁRQUICO BYTE
 
